@@ -1,0 +1,7 @@
+*.jpg
+*.log
+*.pyc
+
+streamer/config.ini
+image-generator/config.json
+arduino/build*

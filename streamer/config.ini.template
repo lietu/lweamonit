@@ -1,0 +1,31 @@
+[mjpg_streamer]
+# lweamonit configuration
+# Include trailing slash to all directory paths
+# Do not use spaces around equals -signs, as the Bash ini parser can't handle them
+# Also, the file must start with a section and not a comment, also due to the parser
+
+#
+# MJPG-streamer settings
+#
+
+# Where is MJPG-streamer located?
+path=/path/to/mjpg/
+
+# What device to use as input device?
+input_device=/dev/video0
+
+# Resolution of the image to stream from the device
+resolution=640x480
+
+# Frames per second to stream, if you want to watch the stream
+# in addition to capturing frames, you might want to raise this
+# to 15 - 30, otherwise 1 should be fine.
+fps=10
+
+#
+# Screen
+#
+[screen]
+
+# Name of the screen instance to put mjpg_streamer in
+name=mjpg

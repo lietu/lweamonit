@@ -1,0 +1,26 @@
+{
+	"logFile": "data.log",
+
+	"imageSource": "http://localhost:8080/?action=snapshot",
+	"imageFile": "image.jpg",
+
+	"arduinoPort": "/dev/ttyUSB0",
+
+	"sensors": [
+		{
+			"name": "Temp Out",
+			"key": "S1",
+			"unit": "C",
+			"range": [-40, 40],
+			"color": "#ff0000"
+		}
+	],
+
+	"iterationInterval": 0,
+
+	"font": "fonts/DejaVuSans.ttf",
+	"fontSize": 11,
+	"textColor": "#111",
+	"outlineColor": "#555",
+	"legendColor": "#e2e2e2"
+}
