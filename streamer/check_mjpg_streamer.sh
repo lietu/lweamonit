@@ -28,7 +28,7 @@ PROCESSES=`screen -list | grep "$SCREEN_NAME" | wc -l`
 # If we didn't find any
 if [ $PROCESSES -lt 1 ]; then
 	# Start screen and the start_mjpg_streamer.sh inside it
-	$SCREEN_COMMAND "$DIR/start_mjpg_streamer.sh"
+	bash -c "$SCREEN $SCREEN_PARAMS $DIR/start_mjpg_streamer.sh"
 
 	# Say we needed to start it
 	echo "Did not find screen with mjpg_streamer, started one."

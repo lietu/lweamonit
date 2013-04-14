@@ -44,12 +44,6 @@ cfg.section.screen
 # Read settings we need
 SCREEN_NAME="$name"
 
-# Enable images section of config
-cfg.section.images
-
-# Read settings we need
-IMAGE_PATH="$originals"
-IMAGE_HTTP_SOURCE="$http_source"
 
 #
 # Do some extra variables that can't be parsed from an .ini file
@@ -60,7 +54,7 @@ IMAGE_HTTP_SOURCE="$http_source"
 INPUT_LIBRARY="${MJPG_STREAMER_PATH}input_uvc.so"
 
 # Full input options, i.e. -i option parameters for mjpg_streamer
-INPUT_OPTIONS="${INPUT_LIBRARY} -d ${INPUT_DEVICE} -r ${IMAGE_RESOLUTION} -f ${INPUT_FPS}"
+INPUT_OPTIONS="${INPUT_LIBRARY} -d ${INPUT_DEVICE} -r ${IMAGE_RESOLUTION} -f ${IMAGE_FPS}"
 
 # Options for output, defaults to HTTP server at port 8080 with it's www -directory under the mjpg_streamer folder
 OUTPUT_OPTIONS="${MJPG_STREAMER_PATH}output_http.so -w ${MJPG_STREAMER_PATH}www"
@@ -68,8 +62,8 @@ OUTPUT_OPTIONS="${MJPG_STREAMER_PATH}output_http.so -w ${MJPG_STREAMER_PATH}www"
 # Where is screen located?
 SCREEN=`which screen`
 
-# Command and options to execute screen with
-SCREEN_COMMAND="${SCREEN} -S ${SCREEN_NAME} -d -m";
+# Options to execute screen with
+SCREEN_PARAMS="-S ${SCREEN_NAME} -d -m";
 
 # Build the full command to run
 COMMAND="${MJPG_STREAMER_PATH}mjpg_streamer -i '${INPUT_OPTIONS}' -o '${OUTPUT_OPTIONS}'"
