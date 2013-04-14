@@ -8,8 +8,6 @@ Everything in this project is licensed under GPLv3 unless otherwise specified. S
 I think at least the following have their own licenses:
  - image-generator/fonts/*
  - streamer/streamer_config.sh
- - arduino/Arduino-Makefile
- - arduino/Arduino-mk
  - arduino/OneWire.*
  - arduino/ds18b20p.*
 
