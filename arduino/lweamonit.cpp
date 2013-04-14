@@ -2,8 +2,8 @@
 
 void lweamonit::setup(void)
 {
-	// Initialize serial port for output at 115200 baud
-	Serial.begin(115200);
+	// Initialize serial port for output at 9600 baud
+	Serial.begin(9600);
 	
 	// Set pin 13 (on-board LED) to expect output
 	pinMode(13, OUTPUT);
