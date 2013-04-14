@@ -18,7 +18,7 @@
 
 	"iterationInterval": 0,
 
-	"font": "fonts/DejaVuSans.ttf",
+	"font": "fonts/DejaVuSerifCondensed.ttf",
 	"fontSize": 11,
 	"textColor": "#111",
 	"outlineColor": "#555",
