@@ -13,7 +13,11 @@ class Runner(object):
         self.iterationInterval = config["iterationInterval"]
         self.logger = logger
 
-    def run(self):
+    def run(self, timestamp=None):
+        breakAfterFirst = False
+        if timestamp is not None:
+            breakAfterFirst = True
+
         i = 0
         while True:
             i += 1
@@ -26,7 +30,7 @@ class Runner(object):
             while data is None:
                 data = self.dataParser.parseLine(self.dataReader.read())
 
-            self.dataLogger.write(data)
+            self.dataLogger.write(data, timestamp=timestamp)
             self.imageDataWriter.write(data, image)
 
             image.save(self.imageFile, "JPEG")
@@ -36,7 +40,7 @@ class Runner(object):
             self.logger.info("Generated image in %.4f seconds" % timeElapsed)
             self.logger.info("Data was: " + str(data))
 
-            if self.iterationInterval == 0:
+            if self.iterationInterval == 0 or breakAfterFirst is True:
                 break
 
             sleepSeconds = self.iterationInterval - timeElapsed

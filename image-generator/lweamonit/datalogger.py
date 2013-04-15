@@ -12,7 +12,10 @@ class DataLogger(object):
         self.logger.debug("Opening log file %s" % logFile)
         self.outFile = open(logFile, "a")
 
-    def write(self, data):
+    def write(self, data, timestamp=None):
+        if timestamp is None:
+            timestamp = time()
+
         line = ""
         for index in data:
             value = data[index]
@@ -21,7 +24,7 @@ class DataLogger(object):
             line += "\t" + key + ": " + str(value)
 
         line = "%i\t%s\n" % (
-            time(),
+            timestamp,
             line.strip()
         )
 

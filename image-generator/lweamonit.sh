@@ -25,4 +25,4 @@ if [ ! -f "${PYTHON}" ]; then
 	exit 1
 fi
 
-"$PYTHON" -m "lweamonit.main"
+"$PYTHON" -m "lweamonit.main" $@

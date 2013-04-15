@@ -1,5 +1,6 @@
 import logging
 import json
+import sys
 
 from datareader import DataReader
 from dataparser import DataParser
@@ -37,7 +38,10 @@ class Launcher(object):
             logger=self.logger
         )
 
-        runner.run()
+        if len(sys.argv) > 1:
+            runner.run(timestamp=int(sys.argv[1]))
+        else:
+            runner.run()
 
     def read_config(self):
 
