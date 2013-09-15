@@ -11,7 +11,7 @@ I think at least the following have their own licenses:
  - arduino/OneWire.*
  - arduino/ds18b20p.*
 
- The DS18B20P library for Arduino is by me and with Creative Commons Attribution-ShareAlike 3.0 Unported 
+ The DS18B20P library for Arduino is by me and with Creative Commons Attribution-ShareAlike 3.0 Unported
  License., however when using lweamonit as a whole, you don't need to attribute me for that library. Only if
  you extract that library and do something else with it.
 
@@ -26,9 +26,9 @@ These are the requirements I am aware of:
 - Python / http://www.python.org/
 - Bash / http://www.gnu.org/s/bash/
 
-You could use some other OS and type of camera if you figure out how to get images off 
-them yourself, other than mjpg_streamer. Please, feel free to modify the system to 
-work with other OSes and camera types. I just wish you don't break any existing 
+You could use some other OS and type of camera if you figure out how to get images off
+them yourself, other than mjpg_streamer. Please, feel free to modify the system to
+work with other OSes and camera types. I just wish you don't break any existing
 functionality, and contribute your patches to the project.
 
 It shouldn't be that big of a PITA to support any other OS as long as you can set up a HTTP server to send the data or modify the image reader to fetch it otherwise. If you do, please do send me patches.
@@ -39,7 +39,7 @@ It shouldn't be that big of a PITA to support any other OS as long as you can se
 ## You will need to set up your Arduino to send some temperature data.
 
 In the arduino subfolder there is a project that I personally use for this.
-It will function perfectly fine with a single DS18B20-PAR sensor. Open up the 
+It will function perfectly fine with a single DS18B20-PAR sensor. Open up the
 config.h -file and make sure the settings look ok. Then just deploy the code
 on your Arduino with the Arduino IDE or any other tools you want to use.
 
@@ -69,9 +69,7 @@ To use it, copy the config.json.template to config.json and configure to taste.
 
 For more DejaVu fonts go to http://dejavu-fonts.org/ .
 
-The software was written with purpose to support multiple different sensors drawn on
-the image but that support wasn't finished because I got fed up with calculating the
-pixels as it is. Maybe later.
+It should support multiple sensor readings being drawn on the image.
 
 
 ## Set up publishing of your generated images
@@ -86,5 +84,5 @@ For more information, go to http://bit.ly/158bNR5 .
 
 # Where can I find more information?
 
-If this documentation is not enough, you might find something more at 
+If this documentation is not enough, you might find something more at
 http://github.com/lietu/lweamonit/ .
