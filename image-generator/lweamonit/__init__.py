@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Lweamonit - Lightweight weather monitoring station tools
 # Copyright (C) 2013  Janne Enberg
 

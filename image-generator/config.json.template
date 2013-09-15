@@ -10,9 +10,9 @@
 		{
 			"name": "Temp Out",
 			"key": "S1",
-			"unit": "C",
+			"unit": "°C",
 			"range": [-40, 40],
-			"color": "#ff0000"
+			"color": "#FFA825"
 		}
 	],
 
@@ -21,6 +21,6 @@
 	"font": "fonts/DejaVuSerifCondensed.ttf",
 	"fontSize": 11,
 	"textColor": "#111",
-	"outlineColor": "#555",
-	"legendColor": "#e2e2e2"
+	"outlineColor": "#6281A2",
+	"legendColor": "#D8EBFF"
 }

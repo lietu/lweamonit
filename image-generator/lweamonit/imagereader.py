@@ -1,3 +1,7 @@
+# coding=utf-8
+#
+# Copyright 2013 Janne Enberg
+
 from PIL import Image
 import urllib2 as urllib
 import io

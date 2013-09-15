@@ -1,3 +1,7 @@
+# coding=utf-8
+#
+# Copyright 2013 Janne Enberg
+
 import time
 
 
@@ -34,7 +38,10 @@ class Runner(object):
             self.imageDataWriter.write(data, image)
 
             image.save(self.imageFile, "JPEG")
-
+            image.save(
+                self.imageFile, "JPEG",
+                quality=88, optimize=True, progressive=True
+            )
             endTime = time.time()
             timeElapsed = endTime - startTime
             self.logger.info("Generated image in %.4f seconds" % timeElapsed)

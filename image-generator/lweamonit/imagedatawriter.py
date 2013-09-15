@@ -1,200 +1,401 @@
+# coding=utf-8
+#
+# Copyright 2013 Janne Enberg
+
 from PIL import ImageDraw
 from PIL import ImageColor
 from PIL import ImageFont
 
+from lweamonit.utils import cached_method
+
 
 class ImageDataWriter(object):
-
     def __init__(self, config, logger):
+        self.config = config
         self.logger = logger
-        self.sensors = config["sensors"]
-
-        self.bgColor = ImageColor.getrgb(config["legendColor"])
-        self.outlineColor = ImageColor.getrgb(config["outlineColor"])
-        self.textColor = ImageColor.getrgb(config["textColor"])
-
-        self.font = ImageFont.truetype(config["font"], config["fontSize"])
 
     def write(self, data, image):
         self.logger.debug("Drawing data on image")
+
+        x, y = 16, 16
+
+        legendSpacing = 16
+
+        legend = Legend(
+            data,
+            self.config
+        )
+
+        legend.draw(
+            x,
+            y,
+            image
+        )
+
+        w, h = legend.get_size()
+
+        y += h + legendSpacing
+
+        sensors = Sensors(
+            data,
+            self.config
+        )
+
+        sensors.draw(
+            x,
+            y,
+            image
+        )
+
+
+class Rectangle(object):
+    def __init__(self, width, height, outline, fill=None):
+        self.width = width
+        self.height = height
+
+        if outline:
+            self.outline = ImageColor.getrgb(outline)
+        else:
+            self.outline = None
+
+        if fill:
+            self.fill = ImageColor.getrgb(fill)
+        else:
+            self.fill = None
+
+    def get_size(self):
+        return self.width, self.height
+
+    def draw(self, x, y, image):
         draw = ImageDraw.Draw(image)
 
-        self.draw_legend(draw, data)
-
-        self.draw_sensors(draw, data)
-
-    def get_sensor_color(self, index):
-        if "ImageColor" not in self.sensors[index]:
-            color = ImageColor.getrgb(
-                self.sensors[index]["color"]
-            )
-            self.sensors[index]["ImageColor"] = color
-
-        return self.sensors[index]["ImageColor"]
-
-    def draw_legend(self, draw, data):
-        """Draw the legend"""
-
-        # Draw the background
-        draw.rectangle(
-            [(2, 2), (300, 26)],
-            outline=self.outlineColor,
-            fill=self.bgColor
-        )
-
-        for index in data:
-            value = data[index]
-            sensor = self.sensors[index]
-
-            sensorColor = self.get_sensor_color(index)
-
-            draw.rectangle(
-                [(6, 6), (22, 22)],
-                outline=self.outlineColor,
-                fill=sensorColor
-            )
-
-            draw.text(
-                (26, 7),
-                "%s (%.2f %s)" % (
-                    sensor["name"],
-                    float(value),
-                    sensor["unit"]
-                ),
-                fill=self.textColor,
-                font=self.font
-            )
-
-    def draw_sensors(self, draw, data):
-        """Draw all the sensors' charts"""
-
-        for index in data:
-            value = data[index]
-            sensor = self.sensors[index]
-
-            sensorColor = self.get_sensor_color(index)
-
-            self.draw_bar_chart(
-                draw=draw,
-                rangeMin=min(sensor["range"]),
-                rangeMax=max(sensor["range"]),
-                unit=sensor["unit"],
-                value=value,
-                top=30,
-                left=2,
-                width=64,
-                height=100,
-                spacing=4,
-                color=sensorColor
-            )
-
-    def draw_bar_chart(self, draw, rangeMin, rangeMax, unit, value,
-                       top, left, width, height, spacing, color):
-        """Draw a bar chart on the image"""
-
-        textSpacing = 6
-
-        # Calculate other useful numbers
-        rangeMid = abs(rangeMin) - rangeMax
-        bottom = top + height
-        right = left + width
-
-        # Make sure we stay inside our bounding box for this
-        if value > rangeMax:
-            value = rangeMax
-
-        if value < rangeMin:
-            value = rangeMin
-
-        # Draw the container box
-        draw.rectangle(
-            [(left, top), (right, bottom)],
-            outline=self.outlineColor,
-            fill=self.bgColor
-        )
-
-        # Calculate area for displaying the bar
-        areaTop = top + spacing
-        areaLeft = left + spacing
-        areaBottom = bottom - spacing
-        areaRight = left + 8
-        areaHeight = areaBottom - areaTop
-
-        # Draw container for the bar
-        draw.rectangle(
-            [
-                (areaLeft, areaTop),
-                (areaRight, areaBottom)
-            ],
-            outline=self.outlineColor,
-            fill=self.bgColor
-        )
-
-        # Draw max, mid and min point values
-        self.draw_text(
-            draw,
-            (areaRight + textSpacing, areaTop),
-            str(rangeMax) + " " + unit
-        )
-
-        self.draw_text(
-            draw,
-            (
-                areaRight + textSpacing,
-                areaTop + (height / 2)
-            ),
-            str(rangeMid) + " " + unit,
-            align="middle"
-        )
-
-        self.draw_text(
-            draw,
-            (areaRight + textSpacing, areaBottom),
-            str(rangeMin) + " " + unit,
-            align="bottom"
-        )
-
-        # Calculation of bar height
-        heightRange = abs(rangeMin - rangeMax)
-        heightRatio = float(areaHeight) / heightRange
-        adjustedValue = abs(rangeMin) + float(value)
-        valueHeight = int(adjustedValue * heightRatio)
-        valueTop = areaBottom - valueHeight
+        coordinates = [
+            (x, y),
+            (x + self.width, y + self.height)
+        ]
 
         draw.rectangle(
-            [
-                (areaLeft + 1, valueTop),
-                (areaRight - 1, areaBottom)
-            ],
-            fill=color
+            coordinates,
+            fill=self.fill,
+            outline=self.outline
         )
 
-    def draw_text(self, draw, position, text, align="top"):
-        """Draw text with position and alignment"""
 
-        yOffset = self.get_align_offset(draw, text, align)
+class Text(object):
+    def __init__(self, text, config):
+        self.text = text
+        self.font = ImageFont.truetype(config["font"], config["fontSize"])
+        self.color = ImageColor.getrgb(config["textColor"])
 
-        draw.text(
-            (
-                position[0],
-                position[1] + yOffset
-            ),
-            text,
-            font=self.font,
-            fill=self.textColor
-        )
+    def get_size(self):
+        return self.font.getsize(self.text)
 
-    def get_align_offset(self, draw, text, align):
+    def draw(self, x, y, image, valign="middle"):
+        if valign:
+            yOffset = self.get_valign_offset(valign)
+            y += yOffset
+
+        draw = ImageDraw.Draw(image)
+        draw.text([x, y], self.text, font=self.font, fill=self.color)
+
+    def get_valign_offset(self, valign):
         """Get the Y offset to apply to align text's edge to given position"""
 
-        if align == "top":
+        if valign == "top":
             return 0
 
-        textSize = draw.textsize(text, font=self.font)
+        textSize = self.get_size()
 
-        if align == "bottom":
+        if valign == "bottom":
             return textSize[1] * -1
-        elif align == "middle":
-            return ((textSize[1] / 2) * -1) - 2
+        elif valign == "middle":
+            return ((textSize[1] / 2) * -1)
 
-        raise ValueError("Invalid value for 'align'")
+        raise ValueError("Invalid value for 'valign'")
+
+
+class BarChart(object):
+    def __init__(self, min, max, value, unit, fill, outline, config):
+        self.min = min
+        self.max = max
+        self.value = value
+        self.unit = unit
+        self.fill = fill
+        self.outline = outline
+
+        self.padding = 6
+
+        self.barWidth = 4
+        self.barHeight = 300
+        self.config = config
+
+        self.texts = None
+
+    @cached_method
+    def get_size(self):
+        width, height = 0, 0
+
+        width += self.barWidth
+        width += self.padding
+
+        # Get the maximum width of the texts
+        w = 0
+        for text in self.get_texts():
+            tw, th = text.get_size()
+            if w < tw:
+                w = tw
+
+        width += w
+
+        height += self.barHeight
+
+        width += 2 * self.padding
+        height += 2 * self.padding
+
+        return width, height
+
+    def draw(self, x, y, image):
+        w, h = self.get_size()
+
+        background = Rectangle(
+            w,
+            h,
+            self.config["outlineColor"],
+            self.config["legendColor"]
+        )
+
+        background.draw(x, y, image)
+
+        x, y = x + self.padding, y + self.padding
+
+        bar = Rectangle(
+            self.barWidth,
+            self.barHeight,
+            self.outline
+        )
+
+        bar.draw(x, y, image)
+
+        value = Rectangle(
+            self.barWidth,
+            self.get_value_height(),
+            None,
+            self.fill
+        )
+
+        value.draw(x, y + (self.barHeight / 2), image)
+
+        w, h = bar.get_size()
+        x += w + self.padding
+
+        texts = self.get_texts()
+        texts[0].draw(x, y, image, valign="top")
+
+        y += self.barHeight / 2
+        texts[1].draw(x, y, image, valign="middle")
+
+        y += self.barHeight / 2
+        texts[2].draw(x, y, image, valign="bottom")
+
+    @cached_method
+    def get_texts(self):
+        texts = []
+
+        texts.append(Text(
+            u"{} {}".format(self.max, self.unit),
+            self.config
+        ))
+
+        texts.append(Text(
+            u"{} {}".format(self.get_mid(), self.unit),
+            self.config
+        ))
+
+        texts.append(Text(
+            u"{} {}".format(self.min, self.unit),
+            self.config
+        ))
+
+        return texts
+
+    def get_mid(self):
+        return (self.min + self.max) / 2
+
+    def get_value_height(self):
+        range = abs(self.min - self.max) / 2
+        print "Range +/- " + str(range)
+
+        ratio = (float(self.barHeight) / range) / 2
+        print "Ratio " + str(ratio)
+
+        valueMidOffset = self.value - self.get_mid()
+
+        print str(valueMidOffset) + " * " + str(ratio)
+
+        valueHeight = int(ratio * valueMidOffset)
+        print "Height " + str(valueHeight)
+
+        return valueHeight * -1
+
+
+class Sensors(object):
+    def __init__(self, data, config):
+        self.data = data
+        self.config = config
+        self.chartSpacing = 16
+
+    def get_size(self):
+        width, height = 0, 0
+
+        for chart in self.get_charts():
+            w, h = chart.get_size()
+
+            if height < h:
+                height = h
+
+            width += w + self.chartSpacing
+
+        return width, height
+
+    def draw(self, x, y, image):
+        for chart in self.get_charts():
+            chart.draw(x, y, image)
+
+            w, h = chart.get_size()
+            x += w + self.chartSpacing
+
+    @cached_method
+    def get_charts(self):
+        charts = []
+
+        for index, sensor in enumerate(self.config["sensors"]):
+            charts.append(BarChart(
+                min(sensor["range"]),
+                max(sensor["range"]),
+                self.data[index],
+                sensor["unit"],
+                sensor["color"],
+                self.config["outlineColor"],
+                self.config
+            ))
+
+        return charts
+
+
+class LegendItem(object):
+    def __init__(self, color, text, config):
+        self.spacing = 4
+
+        self.text = Text(text, config)
+
+        self.indicatorSize = 16
+        self.indicator = Rectangle(
+            self.indicatorSize,
+            self.indicatorSize,
+            config["outlineColor"],
+            color
+        )
+
+    @cached_method
+    def get_size(self):
+        width, height = self.text.get_size()
+
+        width += self.spacing
+        width += self.indicatorSize
+
+        if height < self.indicatorSize:
+            height = self.indicatorSize
+
+        return width, height
+
+    def draw(self, x, y, image):
+        self.indicator.draw(x, y, image)
+        w, h = self.indicator.get_size()
+
+        x += w + self.spacing
+
+        self.text.draw(x, y + (h / 2), image)
+
+
+class Legend(object):
+    def __init__(self, data, config):
+        self.data = data
+
+        self.outline = config["outlineColor"]
+        self.fill = config["legendColor"]
+
+        self.config = config
+
+        self.itemSpacing = 32
+        self.padding = 6
+
+        self.legendItems = None
+
+    @cached_method
+    def get_size(self):
+        items = self.get_legend_items()
+
+        width = 0
+        height = 0
+
+        for item in items:
+            w, h = item.get_size()
+
+            width += w
+            if height < h:
+                height = h
+
+        width += (len(items) - 1) * self.itemSpacing
+
+        width += 2 * self.padding
+        height += 2 * self.padding
+
+        return width, height
+
+    def draw(self, x, y, image):
+        width, height = self.get_size()
+
+        background = Rectangle(
+            width,
+            height,
+            self.outline,
+            self.fill
+        )
+
+        background.draw(x, y, image)
+
+        items = self.get_legend_items()
+
+        x += self.padding
+        y += self.padding
+
+        for item in items:
+            w, h = item.get_size()
+
+            item.draw(x, y, image)
+
+            x += w + self.itemSpacing
+
+    @cached_method
+    def get_legend_items(self):
+        legendItems = []
+
+        for index, value in enumerate(self.data):
+            sensor = self.config["sensors"][index]
+            color = sensor["color"]
+
+            sensorText = u"{} ({:.2f} {})".format(
+                sensor["name"],
+                float(value),
+                sensor["unit"]
+            )
+
+            item = LegendItem(
+                color,
+                sensorText,
+                self.config
+            )
+
+            legendItems.append(item)
+
+        return legendItems

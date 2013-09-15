@@ -1,3 +1,7 @@
+# coding=utf-8
+#
+# Copyright 2013 Janne Enberg
+
 import logging
 import json
 import sys
@@ -43,12 +47,12 @@ class Launcher(object):
         else:
             runner.run()
 
-    def read_config(self):
+    def read_config(self, filename="config.json"):
 
         self.logger.debug("Reading config")
 
         # Open the configuration file
-        configFile = open("config.json")
+        configFile = open(filename)
 
         # Parse the config
         config = json.load(configFile)
