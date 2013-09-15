@@ -71,6 +71,10 @@ For more DejaVu fonts go to http://dejavu-fonts.org/ .
 
 It should support multiple sensor readings being drawn on the image.
 
+This tool can use the data and some configuration to generate images such as this:
+
+![Lweamonit example image](https://raw.github.com/lietu/lweamonit/master/example.jpg)
+
 
 ## Set up publishing of your generated images
 
