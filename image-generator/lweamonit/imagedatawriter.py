@@ -5,6 +5,8 @@
 from PIL import ImageDraw
 from PIL import ImageColor
 from PIL import ImageFont
+from datetime import datetime
+from dateutil.tz import tzlocal
 
 from lweamonit.utils import cached_method
 
@@ -47,6 +49,16 @@ class ImageDataWriter(object):
             image
         )
 
+        date = DateBox(self.config)
+
+        w, h = date.get_size()
+
+        imageWidth, imageHeight = image.size
+        x = imageWidth - w - legendSpacing
+        y = 16
+
+        date.draw(x, y, image)
+
 
 class Rectangle(object):
     def __init__(self, width, height, outline, fill=None):
@@ -82,9 +94,14 @@ class Rectangle(object):
 
 
 class Text(object):
-    def __init__(self, text, config):
+    def __init__(self, text, config, font=None, fontSize=None):
+        if font is None:
+            font = config["font"]
+        if fontSize is None:
+            fontSize = config["fontSize"]
+
         self.text = text
-        self.font = ImageFont.truetype(config["font"], config["fontSize"])
+        self.font = ImageFont.truetype(font, fontSize)
         self.color = ImageColor.getrgb(config["textColor"])
 
     def get_size(self):
@@ -112,6 +129,54 @@ class Text(object):
             return ((textSize[1] / 2) * -1)
 
         raise ValueError("Invalid value for 'valign'")
+
+
+class DateBox(object):
+    def __init__(self, config):
+        tz = tzlocal()
+        dateFormat = '%Y-%m-%d %H:%M:%S UTC%z'
+        self.textContent = datetime.now(tz).strftime(dateFormat)
+        self.font = config["dateFont"]
+        self.fontSize = config["dateFontSize"]
+        self.config = config
+
+        self.padding = 8
+
+    @cached_method
+    def get_size(self):
+        text = self.get_text()
+
+        w, h = text.get_size()
+
+        w, h = w + self.padding * 2, h + self.padding * 2
+
+        return w, h
+
+    def draw(self, x, y, image):
+        w, h = self.get_size()
+
+        rect = Rectangle(
+            w,
+            h,
+            self.config["outlineColor"],
+            self.config["legendColor"]
+        )
+
+        rect.draw(x, y, image)
+
+        x, y = x + self.padding, y + self.padding
+
+        text = self.get_text()
+        text.draw(x, y, image, "top")
+
+    @cached_method
+    def get_text(self):
+        return Text(
+            self.textContent,
+            self.config,
+            self.font,
+            self.fontSize
+        )
 
 
 class BarChart(object):
@@ -223,17 +288,10 @@ class BarChart(object):
 
     def get_value_height(self):
         range = abs(self.min - self.max) / 2
-        print "Range +/- " + str(range)
-
         ratio = (float(self.barHeight) / range) / 2
-        print "Ratio " + str(ratio)
 
         valueMidOffset = self.value - self.get_mid()
-
-        print str(valueMidOffset) + " * " + str(ratio)
-
         valueHeight = int(ratio * valueMidOffset)
-        print "Height " + str(valueHeight)
 
         return valueHeight * -1
 
