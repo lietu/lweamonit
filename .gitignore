@@ -5,3 +5,5 @@
 streamer/config.ini
 image-generator/config.json
 arduino/build*
+.idea/
+.vagrant/
